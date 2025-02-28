@@ -1,18 +1,19 @@
-// const server = require("./app");
-// const dbConnection = require("./Db/Db");
+const server = require("./app");
+const dbConnection = require("./Db/Db");
 
-// const port = process.env.PORT || 3001;
-// dbConnection()
-//     .then(() => {
-//         server.listen(port, () => {
-//             console.log(`Server is running on port  http://localhost:${port}`);
-//         });
-//     })
-//     .catch((error) => {
-//         console.error("Error connecting to database:", error);
-//         process.exit(1);
-//     });
+const port = process.env.PORT || 3001;
+dbConnection()
+    .then(() => {
+        server.listen(port, () => {
+            console.log(`Server is running on port  http://localhost:${port}`);
+        });
+    })
+    .catch((error) => {
+        console.error("Error connecting to database:", error);
+        process.exit(1);
+    });
 
+    
 // const { SerialPort } = require('serialport');
 
 // const port = new SerialPort({
@@ -137,37 +138,37 @@
 //   console.error('❌ Serial Port Error:', err.message);
 // });
 
-const { SerialPort } = require("serialport");
+// const { SerialPort } = require("serialport");
 
-// ✅ Configure Serial Port
-const port = new SerialPort({
-  path: "/dev/ttyUSB0", // Change to the correct port (Windows: 'COM3')
-  baudRate: 115200,
-  autoOpen: false,
-});
+// // ✅ Configure Serial Port
+// const port = new SerialPort({
+//   path: "/dev/ttyUSB0", // Change to the correct port (Windows: 'COM3')
+//   baudRate: 115200,
+//   autoOpen: false,
+// });
 
-// ✅ Function to Send AT Commands
-const sendATCommand = (command, delay = 1000) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      port.write(command + "\r\n", (err) => {
-        if (err) {
-          console.error("❌ Error writing to port:", err.message);
-          return reject(err);
-        }
-        console.log(`📤 Sent: ${command}`);
-      });
-    }, delay);
+// // ✅ Function to Send AT Commands
+// const sendATCommand = (command, delay = 1000) => {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       port.write(command + "\r\n", (err) => {
+//         if (err) {
+//           console.error("❌ Error writing to port:", err.message);
+//           return reject(err);
+//         }
+//         console.log(`📤 Sent: ${command}`);
+//       });
+//     }, delay);
 
-    port.once("data", (data) => {
-      const response = data.toString().trim();
-      console.log("📥 Received:", response);
-      resolve(response);
-    });
-  });
-};
+//     port.once("data", (data) => {
+//       const response = data.toString().trim();
+//       console.log("📥 Received:", response);
+//       resolve(response);
+//     });
+//   });
+// };
 
-// // ✅ Function to Execute AT Commands
+// // // ✅ Function to Execute AT Commands
 // const executeCommands = async () => {
 //   try {
 //     console.log("📡 Initializing Modem and Checking Status...");
@@ -210,43 +211,19 @@ const sendATCommand = (command, delay = 1000) => {
 //   }
 // };
 
-const executeCommands = async () => {
-  // Implement your custom logic 
-  
-  try {
-    
-
-    // Example: Send AT commands to setup network and open TCP server
-    await sendATCommand("AT");
-    await sendATCommand("AT+CFUN=1");
-    // await sendATCommand("AT+CREG?");
-    // await sendATCommand("AT+QIOPEN=?");
-    // await sendATCommand("AT+CPIN?");
-    await sendATCommand("AT+QIACT=1");
-    await sendATCommand("AT+CSQ");
-
-
-await sendATCommand(" AT+QILOCIP ");
 
 
 
-  } catch (error) {
-    
-  }
+// // ✅ Open Serial Port & Execute Commands
+// port.open(async (err) => {
+//   if (err) {
+//     return console.error("❌ Error opening port:", err.message);
+//   }
+//   console.log("✅ Serial port opened successfully.");
+//   await executeCommands();
+// });
 
-};
-
-
-// ✅ Open Serial Port & Execute Commands
-port.open(async (err) => {
-  if (err) {
-    return console.error("❌ Error opening port:", err.message);
-  }
-  console.log("✅ Serial port opened successfully.");
-  await executeCommands();
-});
-
-// ✅ Handle Serial Port Errors
-port.on("error", (err) => {
-  console.error("❌ Serial Port Error:", err.message);
-});
+// // ✅ Handle Serial Port Errors
+// port.on("error", (err) => {
+//   console.error("❌ Serial Port Error:", err.message);
+// });
