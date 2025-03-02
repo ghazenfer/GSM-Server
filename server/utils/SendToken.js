@@ -13,6 +13,7 @@ const sendToken = (user, statusCode, res,message) => {
         sameSite: 'strict' // Prevent CSRF attacks
       };
     
+      
       // Set the cookie and respond with user data
       res.status(statusCode)
         .cookie('token', token, options) // Set the token in cookies

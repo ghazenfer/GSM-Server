@@ -1,114 +1,233 @@
-const  { response }= require ("express")
-const  { SerialPort } = require ("serialport");
+// const { SerialPort } = require('serialport');
 
+// const port = new SerialPort({
+//   path: '/dev/ttyUSB0', // Change for Windows: 'COM3'
+//   baudRate: 115200,
+//   autoOpen: false,
+// });
+
+// port.open((err) => {
+//   if (err) {
+//     return console.error('❌ Error opening port:', err.message);
+//   }
+//   console.log('✅ Serial port opened successfully.');
+
+//   const sendATCommand = (command, callback) => {
+//     setTimeout(() => {
+//       port.write(command + '\r\n', (err) => {
+//         if (err) {
+//           return console.error('❌ Error writing to port:', err.message);
+//         }
+//         console.log(`📤 Sent: ${command}`);
+//         if (callback) callback();
+//       });
+//     }, 1000); // 1-second delay to prevent overflow
+//   };
+
+//   port.on('data', (data) => {
+//     const response = data.toString().trim();
+//     console.log('📥 Received:', response);
+
+//     if (response.includes('+QIACT:')) {
+//       const ipAddress = response.match(/"([^"]+)"/)?.[1] || 'Unknown';
+//       console.log('🌐 SIM IP Address:', ipAddress);
+//     }
+
+//     if (response.includes('+QIOPEN:')) {
+//       if (response.includes('+QIOPEN: 0,0')) {
+//         console.log('✅ TCP connection opened successfully.');
+
+//         sendATCommand('AT+QISTATE=0,1', () => {
+//           sendATCommand('AT+QISEND=0,5', () => {
+//             port.write('hello', (err) => {
+//               if (err) {
+//                 return console.error('❌ Error sending data:', err.message);
+//               }
+//               console.log('✅ Data sent: hello');
+//             });
+//           });
+//         });
+//       } else {
+//         console.error('❌ TCP Connection Failed. Retrying in 5 seconds...');
+//         setTimeout(() => {
+//           sendATCommand('AT+QICLOSE=0', () => {
+//             sendATCommand('AT+QIACT=1', () => {
+//               sendATCommand('AT+QIOPEN=1,0,"TCP","10.206.67.5",8888');
+//             });
+//           });
+//         }, 5000);
+//       }
+//     }
+
+//     if (response.includes('ERROR') || response.includes('+CME ERROR: 58')) {
+//       console.error('❌ Network/Command Error. Resetting module...');
+//       sendATCommand('AT+CFUN=0', () => {
+//         setTimeout(() => {
+//           sendATCommand('AT+CFUN=1', () => {
+//             sendATCommand('AT+QISTATE=0,1');
+//           });
+//         }, 5000);
+//       });
+//     }
+//   });
+
+
+
+
+
+//   // ✅ **Optimized AT Command Sequence**
+//   sendATCommand('AT', () => {
+//     sendATCommand('AT+CGMM', () => {
+//       sendATCommand('AT+CFUN=1', () => {
+//         sendATCommand('AT+CREG?', () => {
+//           sendATCommand('AT+CPIN?', () => {
+//             sendATCommand('AT+CGSN', () => {
+//               sendATCommand('AT+QCFG="nwscanmode"', () => {
+//                 sendATCommand('AT+CGATT?', () => {
+//                   sendATCommand('AT+CSQ', () => {
+//                     sendATCommand('AT+QSPN', () => {
+//                       sendATCommand('AT+QCFG="band"', () => {
+//                         sendATCommand('AT+QIDEACT=1', () => {
+
+//                           // ✅ **Ensure Correct APN Setup**
+//                           sendATCommand('AT+QICSGP=1,1,"jazzconnect.mobilinkworld.com","","",1', () => {
+//                             sendATCommand('AT+CGATT=1', () => {
+//                               sendATCommand('AT+QIACT=1', () => {
+//                                 sendATCommand('AT+QIACT?', () => {
+//                                   sendATCommand('AT+QISTATE=0,1', () => {
+
+//                                     // ✅ **TCP Open with Retry**
+//                                     sendATCommand('AT+QIOPEN=1,0,"TCP","10.206.67.5",8888', () => {
+//                                       console.log('🌍 Establishing TCP connection...');
+//                                     });
+
+//                                   });
+//                                 });
+//                               });
+//                             });
+//                           });
+
+//                         });
+//                       });
+//                     });
+//                   });
+//                 });
+//               });
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
+// });
+
+// // Handle serial port errors
+// port.on('error', (err) => {
+//   console.error('❌ Serial Port Error:', err.message);
+// });
+
+const { SerialPort } = require("serialport");
+
+// ✅ Configure Serial Port
 const port = new SerialPort({
-  path: "/dev/ttyUSB0",
-  baudRate: 115200,
-  autio: false,
+    path: "COM22", // Change to the correct port (Windows: 'COM3'
+    baudRate: 115200,
+    autoOpen: false,
 });
 
-const sendATCommand = (command, delay) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      port.write(
-        command + "\r\n",
-        (err) => {
-          if (err) {
-            console.log("Error writing to Port " + command);
-            return reject(err);
-          }
-        },
-        delay
-      );
-      port.once("data", (data) => {
-        const response = data.toString().trim();
-        console.log("Received: " + response);
-        resolve(response);
-      });
+// ✅ Function to Send AT Commands
+const sendATCommand = (command, delay = 1000) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            port.write(command + "\r\n", (err) => {
+                if (err) {
+                    console.error("❌ Error writing to port:", err.message);
+                    return reject(err);
+                }
+                console.log(`📤 Sent: ${command}`);
+            });
+        }, delay);
+
+
+        
+
+        port.once("data", (data) => {
+            const response = data.toString().trim();
+            console.log("📥 Received:", response);
+            resolve(response);
+        });
     });
-  });
 };
 
-// fUNCTION  to execute the At command
-
+// // ✅ Function to Execute AT Commands
 const executeCommands = async () => {
-  try {
-    console.log("📡 Initializing Modem and Checking Status...");
+    try {
+        console.log("📡 Initializing Modem and Checking Status...");
 
-    const setupCommand = [
-      "AT", // Basic Modem Check
-      "AT+CGMM", // Get Module Model
-      "AT+CFUN=1", // Full Function Mode
-      "AT+CREG?", // Check Network Registration
-      "AT+CPIN?", // Check SIM Status
-      "AT+CGSN", // Get IMEI Number
-      'AT+QCFG="nwscanmode"', // Network Scan Mode
-      "AT+CGATT?", // Check GPRS Attachment
-      "AT+CSQ", // Signal Quality
-      "AT+QSPN", // Service Provider Name
-      'AT+QCFG="band"', // Get Band Settings
-      "AT+QIDEACT=1", // Deactivate Network Context
-      'AT+QICSGP=1,1,"","","",0', // Configure PDP Context
-      "AT+QIACT?", // Check Internet Activation
-      "AT+QIACT=1", // Activate Internet
-      "AT+QIACT?", // Confirm Internet Activation
-      "AT+QISTATE=0,1", // Check Connection State
-      "AT+QILOCIP", // Get Local IP Address
-    ];
+        await sendATCommand("AT");            // Basic Check
+        await sendATCommand("AT+CGMM");     // Full Function Mode
+        await sendATCommand("AT+CFUN=1");      // Network Registration
+        await sendATCommand("AT+CREG?");      // SIM Status
+        await sendATCommand("AT+CPIN?");       // IMEI Number
+        await sendATCommand("AT+CGSN");        // Signal Quality
+        await sendATCommand("AT+QCFG=", "nwseanmode");     // Check GPRS Attachment
+        await sendATCommand("AT+CGATT");       // Service Provider Name
+        await sendATCommand("AT+CSQ");
+        await sendATCommand("AT+QSPN");
+        await sendATCommand("AT+QCFG=band");
+        await sendATCommand("AT+QIDEACT=1");
+        await sendATCommand("AT+QICSGP=1,1,'','','',0");
+        await sendATCommand("AT+QIACT");
+        await sendATCommand("AT+QIACT=1");
+        await sendATCommand("AT+QIACT?");
+        await sendATCommand("AT+QISTATE=0,1");
+        // ✅ Ensure Network is Attached
+        const gprsStatus = await sendATCommand("AT+CGATT?");
+        if (!gprsStatus.includes("+CGATT: 1")) {
+            console.error("❌ GPRS Not Attached. Retrying...");
+            await sendATCommand("AT+CGATT=1", 3000);
+        }
 
-    for (const command of setupCommand) {
-      await sendATCommand(command);
+
+
+
+        // ✅ Configure PDP Context (Use Correct APN)
+        await sendATCommand("AT");            // Basic Check
+        await sendATCommand("AT+CGMM");     // Full Function Mode
+        await sendATCommand("AT+CFUN=1");      // Network Registration
+        await sendATCommand("AT+CREG?");      // SIM Status
+        await sendATCommand("AT+CPIN?");       // IMEI Number
+        await sendATCommand("AT+CGSN");        // Signal Quality
+        await sendATCommand("AT+QCFG=", "nwseanmode");     // Check GPRS Attachment
+        await sendATCommand("AT+CGATT");       // Service Provider Name
+        await sendATCommand("AT+CSQ");
+        await sendATCommand("AT+QSPN");
+        await sendATCommand("AT+QCFG=band");
+        await sendATCommand("AT+QIDEACT=1");
+        await sendATCommand("AT+QICSGP=1,1,'','','',0");
+        await sendATCommand("AT+QIACT");
+        await sendATCommand("AT+QIACT=1");
+        await sendATCommand("AT+QIACT?");
+        await sendATCommand("AT+QISTATE=0,1");
+        await sendATCommand(`AT+QIOPEN=1,0,"TCP LISTENER","43.243.134.163",0,5000,1`);
+
+        console.log("✅ TCP Listener Started Successfully!");
+    } catch (error) {
+        console.error("❌ Error:", error.message);
     }
-
-    console.log("✅ Network Setup Completed. Now Setting Up TCP Server...");
-
-    // ✅ Commands for Opening TCP Listener
-
-    const tcpCommands = [
-      "AT", // Check Modem Again
-      "AT+CGMM", // Get Module Model
-      "AT+CFUN=1", // Full Function Mode
-      "AT+CREG?", // Check Network Registration
-      "AT+CPIN?", // Check SIM Status
-      "AT+CGSN", // Get IMEI Number
-      'AT+QCFG="nwscanmode"', // Network Scan Mode
-      "AT+CGATT?", // Check GPRS Attachment
-      "AT+CSQ", // Signal Quality
-      "AT+QSPN", // Service Provider Name
-
-      // This command is not work
-
-      'AT+QCFG="band"', // Get Band Settings
-      "AT+QIDEACT=1", // Deactivate Network Context
-      'AT+QICSGP=1,1,"","","",0', // Configure PDP Context
-      "AT+QIACT?", // Check Internet Activation
-      "AT+QIACT=1", // Activate Internet
-      "AT+QIACT?", // Confirm Internet Activation
-      "AT+QISTATE=0,1", // Check Connection State
-      "AT+QICLOSE=0", // Close Any Open Connection
-      "AT+QISTATE=0,1", // Check Connection State Again
-      `AT+QIOPEN=1,0,"TCP LISTENER","10.206.67.5",0,5000,1`, // Open TCP Server
-    ];
-    for (const command of tcpCommands) {
-      await sendATCommand(command);
-    }
-    console.log("�� TCP Listener Started Successfully!");
-  } catch (error) {
-    console.error("❌ Error:", error.message);
-  }
 };
+
 
 // ✅ Open Serial Port & Execute Commands
 port.open(async (err) => {
     if (err) {
-      return console.error("❌ Error opening port:", err.message);
+        return console.error("❌ Error opening port:", err.message);
     }
     console.log("✅ Serial port opened successfully.");
     await executeCommands();
-  });
-  
+});
 
 // ✅ Handle Serial Port Errors
 port.on("error", (err) => {
     console.error("❌ Serial Port Error:", err.message);
-  });
+});

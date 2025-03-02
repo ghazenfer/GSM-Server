@@ -1,34 +1,11 @@
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs")
+const mongoose =require("mongoose")
 
 
-const noozleSchema = new mongoose.Schema({
-    NoozleId: {
-        type: String,
-        required: true,
-       
-    },
-    product: {
-        type: String,
-    },
-    rate: {
-        type: String,
-      
-    },
-    lastesale: {
-        type: String,
-    },
-    meterReadng: {
-        type: String,
-    }
-})
+const dataSchema = new mongoose.Schema({
+    ip: String,
+    port: Number,
+    message: String,
+    timestamp: { type: Date, default: Date.now }
+  });
 
-
-
-module.exports = mongoose.model("Noozle", noozleSchema);
-
-
-
-
-
+module.exports = mongoose.model("GsmData", dataSchema);
