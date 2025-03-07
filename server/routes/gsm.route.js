@@ -1,9 +1,9 @@
 const express = require("express");
-const { connectGSM } = require("../Controllers/gsm.controllar");
+const { GetAllmessage } = require("../Controllers/gsm.controllar");
 
 
 const router = express.Router();
 
-router.post('/connect', connectGSM);
+router.get('/message', GetAllmessage);
 
 module.exports = router;

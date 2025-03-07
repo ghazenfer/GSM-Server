@@ -1,9 +1,11 @@
-const connectToGSM = require("../service/TcpServer");
+const CatchAsynicHnadler = require("../utils/CatchAsynicHnadler");
+const Message = require("../models/GMS.model")
 
 
-const connectGSM = (req, res) => {
-  const { ip, port } = req.body;
-  connectToGSM(ip, port, res);
-};
-
-module.exports = { connectGSM };
+exports.GetAllmessage=CatchAsynicHnadler(async(req,res,next)=>{
+        const message=await Message.find()
+        res.status(200).json({
+          success:true,
+          message,
+        })
+        })
